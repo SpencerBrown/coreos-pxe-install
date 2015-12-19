@@ -1,0 +1,4 @@
+# Default inventory file for playbooks not specific to an environment.
+
+[local]
+localhost ansible_connection=local

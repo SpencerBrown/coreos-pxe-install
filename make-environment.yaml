@@ -1,0 +1,62 @@
+- name: Create a new environment (top level directory name)
+  hosts: local
+  gather_facts: no
+  tasks:
+
+  - fail:
+      msg: "Please specify the environment name (use the env variable)"
+    when: env is not defined
+
+  - stat:
+      path: "{{ env }}"
+    register: env_dir
+
+  - fail:
+      msg: "Environment {{ env }} already exists"
+    when: env_dir.stat.islnk is defined
+
+  - name: Create directory structure
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+    - "{{ env }}/group_vars/local"
+    - "{{ env }}/public-files"
+    - "{{ env }}/secret-files"
+
+  - name: Create hosts file
+    copy:
+      dest: "{{ env }}/hosts"
+      content: "[local]\nlocalhost ansible_connection=local env={{ env }}"
+
+  - name: Create ansible.cfg file
+    copy:
+      dest: "{{ env }}/ansible.cfg"
+      content: "[defaults]\ninventory = hosts\nvault_password_file = vault-password"
+
+  - name: create variable names file "vars.yaml" in group_vars defining "plaintext_files" variable
+    # This will also ensure there's a file in group_vars/local, so that Git will commit the directories
+    # content is plaintext_files: "{{ secret_files }}"
+    copy:
+      dest: "{{ env }}/group_vars/local/vars.yaml"
+      content: "plaintext_files: {{ '\"{{' }} secret_files {{ '}}\"' }}"
+
+  - name: create SSH keypair for this environment
+    command: "ssh-keygen -f ~/.ssh/{{ env }}-key -N \"\""
+    args:
+      creates: "~/.ssh/{{ env }}-key"
+
+  - name: copy private key to secret-files directory
+    copy:
+      src: "~/.ssh/{{ env }}-key"
+      dest: "{{ env }}/secret-files/{{ env }}-key"
+
+  - name: copy public key to public-files directory
+    copy:
+      src: "~/.ssh/{{ env }}-key.pub"
+      dest: "{{ env }}/public-files/{{ env }}-key.pub"
+
+  - name: Create vault-password file with random password
+    command: "true {{ lookup('password', env + '/vault-password chars=ascii_letters') }}"
+
+  - include: roles/common/tasks/add-to-git.yaml
