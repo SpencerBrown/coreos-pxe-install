@@ -36,9 +36,12 @@ Generally, follow the directions in the [Beginners' Guide](https://wiki.archlinu
 
 Connect (temporarily) a keyboard and display to your machine. Boot the machine into its BIOS settings. (Typically you press the Delete or F2 key several times after booting.)
 
-Adjust the machine's BIOS settings to boot from your media, and boot the install media. 
+Or, many machines now support a special "boot override" mode which does a one-time boot from a specified device, without changing the BIOS defaults.
+Try F11 for this, or see the display on your screen from the BIOS for a hint.
 
-Select the 64-bit version to run.
+Adjust the machine's BIOS settings to boot from your media, selecting the UEFI boot if available. 
+
+Select the 64-bit version to run, if you are given a choice.
 
 #### Initial setup
 
@@ -61,6 +64,7 @@ sgdisk --zap-disk /dev/sda
 gdisk /dev/sda
 o    (overwrite partition table)
 n    (create new partition)
+(enter)    (accept default partiton 1)
 <enter>    (accept default start)
 512M       (partition size 512 megabytes)
 ef00       (partition type EFI System)
@@ -97,6 +101,7 @@ vim /etc/pacman.d/mirrorlist
 
 ```
 mount /dev/sda2 /mnt       (adjust partition name as needed)
+mkdir /mnt/boot
 mount /dev/sda1 /mnt/boot
 pacstrap /mnt base base-devel     (this will download and install a bunch of packages)
 ```
