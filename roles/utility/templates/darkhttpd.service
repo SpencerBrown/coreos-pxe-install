@@ -1,0 +1,10 @@
+[Unit]
+Description=Darkhttpd Webserver
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/darkhttpd /srv/http --uid nobody --gid nobody --chroot --mimetypes /etc/mime.types --addr 10.0.0.1
+
+[Install]
+WantedBy=multi-user.target

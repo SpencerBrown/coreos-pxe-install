@@ -190,7 +190,6 @@ passwd admin
 EDITOR=vim visudo
 (uncomment the line "# %wheel ALL=(ALL) NOPASSWD: ALL")
 ```
-```
 
 ## Configuring the network
 
@@ -216,14 +215,14 @@ systemctl reboot
 ## Setting up SSH access
 
 As root:
+
 ```
 pacman -S openssh
 systemctl enable sshd
 systemctl start sshd
 ```
 
-As user `admin`:
-`mkdir ~/.ssh`
+As user `admin`:  `mkdir ~/.ssh`
 
 Now go to another machine: (can be OS X or Linux)
 

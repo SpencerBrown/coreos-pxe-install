@@ -1,0 +1,6 @@
+[local]
+localhost ansible_connection=local env=utility
+
+[utility]
+#TODO: use fact caching to remember the mac address of a powered down utility machine
+utility ansible_ssh_host=10.2.0.202 ansible_ssh_user=admin mac_address="d0:50:99:88:e3:7d"

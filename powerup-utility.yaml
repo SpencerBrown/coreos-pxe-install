@@ -1,0 +1,7 @@
+- name: Wake up the Arch Linux utility machine
+  hosts: utility
+  gather_facts: no
+  tasks:
+
+  - name: wake it up (OS X only, must "brew install wakeonlan"
+    local_action: "command wakeonlan {{ mac_address }}"

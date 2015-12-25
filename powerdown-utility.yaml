@@ -1,0 +1,8 @@
+- name: power down the Arch Linux utility machine
+  hosts: utility
+  sudo: yes
+  tasks:
+
+  - name: shut it down
+    command: "systemctl poweroff"
+    ignore_errors: yes
