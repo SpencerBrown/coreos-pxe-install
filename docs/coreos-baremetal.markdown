@@ -6,8 +6,6 @@ It is possible to use older projects like [dnsmasq](http://www.thekelleys.org.uk
 
 ## Initial setup
 
-## Prerequisites
-
 ### Machines
 
 You will need an OS X machine and servers for PXE booting CoreOS. You will need administrative access to the OS X machine.
@@ -43,7 +41,7 @@ Recommend using [Homebrew](http://brew.sh) and `brew install go`. Then [follow i
 ```bash
 go get github.com/coreos/coreos-baremetal
 # (you will see an error message about no buildable code, ignore it)
-cd $GOPATH/github.com/coreos/coreos-baremetal
+cd $GOPATH/src/github.com/coreos/coreos-baremetal
 ./build darwin
 go get github.com/danderson/pixiecore
 ```
@@ -57,13 +55,13 @@ Create a directory for holding your PXE configurations and CoreOS images, and se
 ```bash
 cd $CBM
 mkdir -p {data/cloud,data/machines/default,data/specs}
-ln -s $GOPATH/github.com/coreos/coreos-baremetal/bin/server bootcfg
-ln -s $GOPATH/github.com/bin/pixiecore pixiecore
+ln -s $GOPATH/src/github.com/coreos/coreos-baremetal/bin/server bootcfg
+ln -s $GOPATH/bin/pixiecore pixiecore
 ```
 
 ```bash
 # (the following downloads a version of CoreOS. Modify "alpha" and "current" to the channel and release that you wish to use.)
-$GOPATH/github.com/coreos/coreos-baremetal/scripts/get-coreos alpha current
+$GOPATH/src/github.com/coreos/coreos-baremetal/scripts/get-coreos alpha current
 ```
 
 ### Create SSH keypair
@@ -72,7 +70,7 @@ Create an SSH keypair for your PXE boot servers using `ssh-keygen`. In this exam
 
 ### Create default cloud config file
 
-Create `$CBM/cloud/pxe-ignition-default.json` adding your SSH public key file contents:
+Create `$CBM/data/cloud/pxe-ignition-default.json` adding your SSH public key file contents:
 
 ```json
 {
@@ -82,7 +80,7 @@ Create `$CBM/cloud/pxe-ignition-default.json` adding your SSH public key file co
       {
         "name": "core",
         "sshAuthorizedKeys": [
-          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXmYK4l3mXfIrSmV3IMZK/BC8CKPeZ/7VDkM1x8V5ulFZLM9gKhd//eGP10gvkoinOLYBFUntDZA4v6BB5UPI1sr2AaJ0LsHoMpebnMW4oNgx/8aBIChujhYmeAQut+pc9k24MYkFq2TJLCl0pE3S6Hxgw6oJUW0DyNWlSSBLcu/neiZO3Lw2uVScPlBQkxvhJa0SprqTgXJhht2QXrag/QAQzaHKtim7ZOC96qITrYy+04JqtWZ2BTAaGyQiAjzroDBMZm21RbC0sB2Q7E7RanjKEfw45zBvM7/G5g/QllNrWJFIhcSr5oMslTirlxUS1AGcf194KVZh+uJcxct6x spebrown@SpencerMBPro"
+          "PASTE YOUR SSH PUBLIC KEY HERE: CONTENTS OF FILE coreos-pxe.pub"
         ]
       }
     ]
@@ -100,7 +98,10 @@ Create `$CBM/cloud/pxe-ignition-default.json` adding your SSH public key file co
 ```
 ### Create default machine entry
 
-Create `$CBM/machines/default/machine.json` as follows: (if you downloaded a specific CoreOS version, substitute that version number for `current`)
+Create `$CBM/data/machines/default/machine.json` as follows:
+
+* substitute your machine's IP address for `10.2.0.200`
+* if you downloaded a specific CoreOS version, substitute that version number for `current`
 
 ```json
 {
@@ -115,7 +116,7 @@ Create `$CBM/machines/default/machine.json` as follows: (if you downloaded a spe
               "coreos.first_boot": "1"
           }
       },
-      "cloud_id": "pxe-ignition.json"
+      "cloud_id": "pxe-ignition-default.json"
     },
     "spec_id": ""
 }
@@ -127,7 +128,7 @@ On your OS X machine, start pixiecore by opening a terminal window and:
 
 ```bash
 cd $CBM
-./sudo ./pixiecore -api=http://localhost:8080/pixiecore
+sudo ./pixiecore -api=http://localhost:8080/pixiecore
 ```
 
 pixiecore must run as root because it opens privileged ports to listen for DHCP and TFTP requests from the PXE booted servers.
@@ -137,7 +138,7 @@ Start the coreos-baremetal server by opening another terminal window and:
 
 ```bash
 cd $CBM
-./bootcfg
+./bootcfg --address=0.0.0.0:8080
 ```
 
 Now, power on your PXE boot server. For first time use, you may want to attach a keyboard and display for debugging purposes.
