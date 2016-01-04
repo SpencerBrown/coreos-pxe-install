@@ -2,10 +2,19 @@
   "ignitionVersion": 1,
   "passwd": {
     "users": [
-      { "name": "core",
+      {
+        "name": "core",
         "sshAuthorizedKeys": [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXmYK4l3mXfIrSmV3IMZK/BC8CKPeZ/7VDkM1x8V5ulFZLM9gKhd//eGP10gvkoinOLYBFUntDZA4v6BB5UPI1sr2AaJ0LsHoMpebnMW4oNgx/8aBIChujhYmeAQut+pc9k24MYkFq2TJLCl0pE3S6Hxgw6oJUW0DyNWlSSBLcu/neiZO3Lw2uVScPlBQkxvhJa0SprqTgXJhht2QXrag/QAQzaHKtim7ZOC96qITrYy+04JqtWZ2BTAaGyQiAjzroDBMZm21RbC0sB2Q7E7RanjKEfw45zBvM7/G5g/QllNrWJFIhcSr5oMslTirlxUS1AGcf194KVZh+uJcxct6x spebrown@SpencerMBPro"
         ]
+      }
+    ]
+  },
+  "networkd": {
+    "units": [
+      {
+        "name": "90-defaults.link",
+        "contents": "[Link]\nNamePolicy=kernel database onboard slot path\nMACAddressPolicy=persistent\nWakeOnLan=magic\n"
       }
     ]
   }

@@ -41,20 +41,31 @@
       dest: "{{ env }}/group_vars/local/vars.yaml"
       content: "plaintext_files: {{ '\"{{' }} secret_files {{ '}}\"' }}"
 
-  - name: create SSH keypair for this environment
+  - name: create SSH keypair for this environment's utility machine
     command: "ssh-keygen -f ~/.ssh/{{ env }}-key -N \"\""
     args:
       creates: "~/.ssh/{{ env }}-key"
 
-  - name: copy private key to secret-files directory
-    copy:
-      src: "~/.ssh/{{ env }}-key"
-      dest: "{{ env }}/secret-files/{{ env }}-key"
+  - name: create SSH keypair for this environment's cluster machines
+    command: "ssh-keygen -f ~/.ssh/{{ env }}-cluster-key -N \"\""
+    args:
+      creates: "~/.ssh/{{ env }}-cluster-key"
 
-  - name: copy public key to public-files directory
+  - name: copy private keys to secret-files directory
     copy:
-      src: "~/.ssh/{{ env }}-key.pub"
-      dest: "{{ env }}/public-files/{{ env }}-key.pub"
+      src: "{{ item }}"
+      dest: "{{ env }}/secret-files/"
+    with_items:
+    - "~/.ssh/{{ env }}-key"
+    - "~/.ssh/{{ env }}-cluster-key"
+
+  - name: copy public keys to public-files directory
+    copy:
+      src: "{{ item }}"
+      dest: "{{ env }}/public-files/"
+    with_items:
+    - "~/.ssh/{{ env }}-key.pub"
+    - "~/.ssh/{{ env }}-cluster-key.pub"
 
   - name: Create vault-password file with random password
     command: "true {{ lookup('password', env + '/vault-password chars=ascii_letters') }}"
