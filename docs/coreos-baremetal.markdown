@@ -1,4 +1,4 @@
-# How to PXE boot CoreOS from an OS X server
+# How to PXE boot CoreOS from an OS X or CoreOS server
 
 This guide uses two excellent projects: [pixiecore](https://github.com/danderson/pixiecore) and [coreos-baremetal](https://github.com/coreos/coreos-baremetal). Both of these projects are written in Go, and can be built for either Linux or OS X. This guide details how to install and use them to set up a fast, flexible PXE boot environment on OS X.
 
@@ -8,33 +8,60 @@ It is possible to use older projects like [dnsmasq](http://www.thekelleys.org.uk
 
 ### Machines
 
-You will need an OS X machine and servers for PXE booting CoreOS. You will need administrative access to the OS X machine.
+You will need an OS X or CoreOS machine to act as a PXE boot server.
+You will need machines that you want to PXE boot into CoreOS. We will call these the booted machines.
+You will need administrative access to the boot server.
+You will need physical access, most likely, to the booted servers.
 All these machines should have Ethernet wired connections to the local network.
 
 ### Local network
 
-Your local network should have wired Ethernet connections available for your OS X machine and your servers.
+Your local network should have wired Ethernet connections available for your boot server and your booted machines.
 The network must have Internet access, typically via a NAT router.
 The network should have a DHCP service, and you need administrative access to the DHCP server.
 In many cases, this is simply your network's NAT router.
 
-You will need to assign static IP addresses to the OS X machine and the servers. So create an IP addressing plan for this.
+You will need to assign static IP addresses to the boot server and the booted machines. So create an IP addressing plan for this.
 
 The best way to do this (and what is assumed here) is to have a DHCP server that supports DHCP reservations (aka static DHCP), which allows you to assign a fixed IP address to a machine's MAC address.
 When a machine boots, it will ask the DHCP server for an IP address, but will always get the reserved static IP address.
 
-Configure the DHCP server to assign a static IP to your OS X machine, then reboot the machine (or refresh the DHCP lease).
+Configure the DHCP server to assign a static IP to your boot server, then reboot the machine or refresh the DHCP lease to get the new IP address.
 
-### Servers to PXE boot CoreOS
+### Booted machines
 
-These servers should be Ethernet connected to your network, and be capable of PXE booting over the network.
-Most network adapters support PXE boot, and typically new servers come with PXE boot already set up.
-You may need to boot your server into its BIOS and reconfigure its boot settings to do this.
+These machines should be Ethernet connected to your network, and be capable of PXE booting over the network.
+Most network adapters support PXE boot, and typically new machines come with PXE boot already set up as a default boot.
+You may need to boot a machine into its BIOS and reconfigure its boot settings for PXE booting.
 
-### OS X setup
+In some cases, the Ethernet port on the motherboard does not support PXE booting.
+The only recourse is to add a network adapter that does support PXE boot.
 
-The OS X machine must have the Go language installed and its environment set up.
+### Boot server setup
+
+The boot server must have the Go language installed and its environment set up.
+
+* OS X setup
+
 Recommend using [Homebrew](http://brew.sh) and `brew install go`. Then [follow instructions](https://golang.org/doc/install#testing) to set up your Go project directory and test your installation.
+
+* CoreOS setup
+
+You can install Go directly on CoreOS, no need to use containers. Logged in as user `core`:
+
+```bash
+# Substitute a newer version of Go for "1.5.2" as appropriate
+wget https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz
+mkdir go
+tar -C go -xzf go1.5.2.linux-amd64.tar.gz
+cp .bashrc bashrc
+echo 'export GOROOT=~/go' >> bashrc
+echo 'export PATH=$PATH:$GOROOT/bin' >> bashrc
+echo 'export GOPATH=$HOME/work' >> bashrc
+rm .bashrc
+mv bashrc .bashrc
+source .bashrc
+```
 
 ### Download and build projects
 
@@ -42,7 +69,8 @@ Recommend using [Homebrew](http://brew.sh) and `brew install go`. Then [follow i
 go get github.com/coreos/coreos-baremetal
 # (you will see an error message about no buildable code, ignore it)
 cd $GOPATH/src/github.com/coreos/coreos-baremetal
-./build darwin
+# If on OS X, run "./build darwin" instead
+./build
 go get github.com/danderson/pixiecore
 ```
 
@@ -57,16 +85,19 @@ cd $CBM
 mkdir -p {data/cloud,data/machines/default,data/specs}
 ln -s $GOPATH/src/github.com/coreos/coreos-baremetal/bin/server bootcfg
 ln -s $GOPATH/bin/pixiecore pixiecore
-```
-
-```bash
-# (the following downloads a version of CoreOS. Modify "alpha" and "current" to the channel and release that you wish to use.)
+# (the following downloads a version of CoreOS for PXE booting. Modify "alpha" and "current" to the channel and release that you wish to use.)
 $GOPATH/src/github.com/coreos/coreos-baremetal/scripts/get-coreos alpha current
 ```
 
 ### Create SSH keypair
 
 Create an SSH keypair for your PXE boot servers using `ssh-keygen`. In this example we'll call it `coreos-pxe`.
+
+```bash
+cd ~/.ssh
+ssh-keygen -f coreos-pxe
+# hit enter to take all defaults
+```
 
 ### Create default cloud config file
 
@@ -100,7 +131,7 @@ Create `$CBM/data/cloud/pxe-ignition-default.json` adding your SSH public key fi
 
 Create `$CBM/data/machines/default/machine.json` as follows:
 
-* substitute your machine's IP address for `10.2.0.200`
+* substitute the boot server's IP address for `10.2.0.200`
 * if you downloaded a specific CoreOS version, substitute that version number for `current`
 
 ```json
@@ -124,7 +155,7 @@ Create `$CBM/data/machines/default/machine.json` as follows:
 
 ## First boot of PXE server
 
-On your OS X machine, start pixiecore by opening a terminal window and:
+On the boot server, start pixiecore by opening a terminal window and:
 
 ```bash
 cd $CBM
@@ -141,7 +172,7 @@ cd $CBM
 ./bootcfg --address=0.0.0.0:8080
 ```
 
-Now, power on your PXE boot server. For first time use, you may want to attach a keyboard and display for debugging purposes.
+Now, power on a booted machine. For first time use, you may want to attach a keyboard and display for debugging purposes.
 You should see CoreOS boot up. If you have a keyboard/display attached, CoreOS will automatically login the core user.
 
 ### Troubleshooting
@@ -166,5 +197,5 @@ Reboot the server so that it picks up the reserved IP.
 Use your private SSH key to login remotely to the server, using the static IP address you assigned.
 The username is `core`. For example:
 
-`ssh -i ~/.ssh/my-pxe-key core@10.2.0.197`
+`ssh -i ~/.ssh/coreos-pxe core@10.2.0.197`
 
