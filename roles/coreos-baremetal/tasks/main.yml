@@ -1,0 +1,89 @@
+
+- name: Create cbm directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - cbm/data/ignition
+  - cbm/data/cloud
+  - cbm/data/specs/default
+  - cbm/data/specs/initialize
+  - cbm/data/specs/normal
+  - cbm/dnsmasq.data/tftp
+  - cbm/assets/coreos
+
+- name: Create symlinks to executables
+  file:
+    path: cbm/bootcfg
+    src: "{{ cbm_gopath }}/src/github.com/coreos/coreos-baremetal/bin/bootcfg"
+    state: link
+- file:
+    path: cbm/dnsmasq
+    src: /usr/local/sbin/dnsmasq
+    state: link
+
+- name: Download undionly.kpxe if needed
+  stat:
+    path: cbm/dnsmasq.data/tftp/undionly.kpxe.0
+  register: undionly_file
+- get_url:
+    dest: cbm/dnsmasq.data/tftp/undionly.kpxe.0
+    url: http://boot.ipxe.org/undionly.kpxe
+  when: undionly_file.stat.exists==False
+
+- name: Create config.yaml
+  copy:
+    src: config.yaml
+    dest: cbm/data/config.yaml
+
+- name: Create dnsmasq.conf and dnsmasq.leases
+  template:
+    src: dnsmasq.conf
+    dest: cbm/dnsmasq.data/dnsmasq.conf
+- file:
+    path: cbm/dnsmasq.data/dnsmasq.leases
+    state: touch
+
+- name: create spec.json files for default, initialize, and normal
+  template:
+    src: "spec-{{ item }}.json"
+    dest: "cbm/data/specs/{{ item }}/spec.json"
+  with_items:
+  - default
+  - initialize
+  - normal
+
+- name: create default.json Ignition file
+  template:
+    src: default.json
+    dest: "cbm/data/ignition/default.json"
+
+- name: If needed, download CoreOS pxe binaries and verify signatures
+  stat:
+    path: cbm/assets/coreos/{{ coreos_release }}
+  register: coreos_release_directory
+- file:
+    path: cbm/assets/coreos/{{ coreos_release }}
+    state: directory
+  when: coreos_release_directory.stat.exists==false
+- get_url:
+    dest: "cbm/assets/coreos/{{ coreos_release }}/"
+    url: "http://{{ coreos_channel }}.release.core-os.net/amd64-usr/{{ coreos_release }}/{{ item }}"
+  with_items:
+  - coreos_production_pxe.vmlinuz
+  - coreos_production_pxe.vmlinuz.sig
+  - coreos_production_pxe_image.cpio.gz
+  - coreos_production_pxe_image.cpio.gz.sig
+  when: coreos_release_directory.stat.exists==false
+- get_url:
+    dest: "cbm/assets/coreos/{{ coreos_release }}/"
+    url: "https://coreos.com/security/image-signing-key/CoreOS_Image_Signing_Key.asc"
+  when: coreos_release_directory.stat.exists==false
+- script: "verify-coreos-sig.sh {{ inventory_dir }}/cbm/assets/coreos/{{ coreos_release }}"
+  when: coreos_release_directory.stat.exists==false
+  register: gpg_output
+#- debug: var=gpg_output
+- fail:
+    msg: "CoreOS signature verification failed! BEWARE!"
+  when: (coreos_release_directory.stat.exists==false) and (gpg_output.stderr | search('BAD'))
+

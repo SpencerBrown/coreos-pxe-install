@@ -1,4 +1,4 @@
-# Create a utility machine
+# Create an Arch Linux utility machine
 
 ## Acquire a machine
 

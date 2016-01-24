@@ -1,1 +1,0 @@
-plaintext_files: "{{ secret_files }}"

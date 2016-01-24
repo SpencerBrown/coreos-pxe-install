@@ -1,3 +1,5 @@
 - name: Add files to git
   command: "git add {{ inventory_dir }}"
+  args:
+    warn: no
   changed_when: false
