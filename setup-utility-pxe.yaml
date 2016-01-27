@@ -1,7 +1,0 @@
-- name: Set up the Arch Linux utility machine to be a PXE server for CoreOS
-  hosts: utility
-  sudo: yes
-  tasks:
-
-  - include: roles/utility/tasks/install.yaml
-  - include: roles/utility/tasks/config-files.yaml
