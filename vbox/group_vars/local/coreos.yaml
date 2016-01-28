@@ -1,0 +1,5 @@
+boot_server_ip: "10.3.0.152"
+boot_server_ip_base: "10.3.0.0"
+boot_server_ip_netmask: "255.255.252.0"
+coreos_channel: alpha
+coreos_release: "current"

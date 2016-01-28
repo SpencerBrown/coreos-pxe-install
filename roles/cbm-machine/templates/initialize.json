@@ -1,0 +1,22 @@
+{
+  "ignitionVersion": 1,
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "{{ lookup('file', env+'/public-files/'+env+'-key.pub') }}"
+        ]
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "name": "set-hostname.service",
+        "enable": true,
+        "contents": "[Unit]\n[Service]\nType=oneshot\nExecStart=/usr/bin/hostnamectl set-hostname {{ inventory_hostname }}\n[Install]\nWantedBy=multi-user.target"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "ignitionVersion": 1,
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC09TuJHaqfxZXeEcTUwdilIeqdeq5h+rkpTasno7CfdeKM1stFOGqFVjHiFixC+cOtZW+Sxa2aMNKEnbdJwptKYyRy5EKJBzGpLxjvQk9hSldPJ0M4NCGSMz7SgwgSw+UqdkVfhfz0Lbk0urtdUL8bs9ap5c2poUsWE5j8WS/MvCL18adPxDQqFgnpX1sF1HFZ7+sgykF3oG6rI4dsocTkDSIwvVAqpZY9FjqvHrjAfaTAKpQ4ypGZ/Th3zIvbzc7PpRf89u/hi+1hez3lfuKyukcTmbXnwzarhvlmj9xcxs2w7oN2p0D+bn1Zt6ZBv6nPa8J7T8ptdyzq1MJ/vKaL spencer@Spencers-MacBook-Pro-2.local"
+        ]
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "name": "set-hostname.service",
+        "enable": true,
+        "contents": "[Unit]\n[Service]\nType=oneshot\nExecStart=/usr/bin/hostnamectl set-hostname default\n[Install]\nWantedBy=multi-user.target"
+      }
+    ]
+  }
+}

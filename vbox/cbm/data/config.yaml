@@ -1,0 +1,27 @@
+api_version: v1alpha1
+groups:
+
+# The default spec is used if no other spec matches the machine.
+# It simply boots the machine using RAM only, with the SSH key.
+# You can login to the machine and inspect or modify it.
+- name: default
+  spec: default
+
+# The initialize spec wipes and repartitions and formats /dev/sda and /dev/sdb,
+# creates the CoreOS root filesystem on /dev/sda,
+# and uses Ignition to initialize required things.
+# We normally require uuid: nobody, so this spec won't get triggered.
+# Change the require: section and restart bootcfg to initialize a machine.
+- name: initialize
+  spec: initialize
+  require:
+    mac: 08:00:27:ba:be:10
+    #uuid: nobody
+
+# The normal spec simply boots the system. It assumes everything is already configured.
+- name: normal
+  spec: normal
+  require:
+    #mac: 90:2b:34:14:f6:6a
+    uuid: nobody
+

@@ -1,0 +1,13 @@
+{
+  "id": "default",
+  "boot": {
+    "kernel": "/assets/coreos/current/coreos_production_pxe.vmlinuz",
+    "initrd": [ "/assets/coreos/current/coreos_production_pxe_image.cpio.gz" ],
+    "cmdline": {
+      "coreos.config.url": "http://10.3.0.152:8080/ignition?uuid=dontmatch",
+      "coreos.autologin": "",
+      "coreos.first_boot": "1"
+    }
+  },
+  "ignition_id": "default.json"
+}

@@ -7,14 +7,6 @@
       msg: "Please specify the environment name (use the env variable)"
     when: env is not defined
 
-  - stat:
-      path: "{{ env }}"
-    register: env_dir
-
-  - fail:
-      msg: "Environment {{ env }} already exists"
-    when: env_dir.stat.islnk is defined
-
   - name: Create directory structure
     file:
       path: "{{ item }}"
@@ -34,30 +26,25 @@
       dest: "{{ env }}/ansible.cfg"
       content: "[defaults]\ninventory = hosts\nvault_password_file = vault-password"
 
-  - name: create variable names file "vars.yaml" in group_vars defining "plaintext_files" variable
+  - name: create variable names file "plaintextvars.yaml" in group_vars defining "plaintext_files" variable
     # This will also ensure there's a file in group_vars/local, so that Git will commit the directories
     # content is plaintext_files: "{{ secret_files }}"
     copy:
-      dest: "{{ env }}/group_vars/local/vars.yaml"
+      dest: "{{ env }}/group_vars/local/plaintextvars.yaml"
       content: "plaintext_files: {{ '\"{{' }} secret_files {{ '}}\"' }}"
 
-  - name: create SSH keypair for this environment's utility machine
+  - name: create SSH keypair for this environment's machines
     command: "ssh-keygen -f ~/.ssh/{{ env }}-key -N \"\""
     args:
       creates: "~/.ssh/{{ env }}-key"
-
-  - name: create SSH keypair for this environment's cluster machines
-    command: "ssh-keygen -f ~/.ssh/{{ env }}-cluster-key -N \"\""
-    args:
-      creates: "~/.ssh/{{ env }}-cluster-key"
 
   - name: copy private keys to secret-files directory
     copy:
       src: "{{ item }}"
       dest: "{{ env }}/secret-files/"
+      mode: 0600
     with_items:
     - "~/.ssh/{{ env }}-key"
-    - "~/.ssh/{{ env }}-cluster-key"
 
   - name: copy public keys to public-files directory
     copy:
@@ -65,9 +52,10 @@
       dest: "{{ env }}/public-files/"
     with_items:
     - "~/.ssh/{{ env }}-key.pub"
-    - "~/.ssh/{{ env }}-cluster-key.pub"
 
   - name: Create vault-password file with random password
     command: "true {{ lookup('password', env + '/vault-password chars=ascii_letters') }}"
+    args:
+      creates: "{{ env }}/vault-password"
 
   - include: roles/common/tasks/add-to-git.yaml

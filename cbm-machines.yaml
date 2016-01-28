@@ -1,0 +1,5 @@
+- name: Set up new CoreOS machine
+  hosts: coreos
+  gather_facts: no
+  roles:
+  - cbm-machine

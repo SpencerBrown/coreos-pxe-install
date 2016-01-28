@@ -1,0 +1,40 @@
+
+- name: Create cbm directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - cbm/data/ignition
+  - cbm/data/cloud
+  - cbm/data/specs/default
+  - cbm/data/specs/initialize
+  - cbm/data/specs/normal
+  - cbm/assets/coreos
+  - cbm/assets/pxe
+
+- name: Create symlinks to executables
+  file:
+    path: cbm/bootcfg
+    src: "{{ cbm_gopath }}/src/github.com/coreos/coreos-baremetal/bin/bootcfg"
+    state: link
+- file:
+    path: cbm/dnsmasq
+    src: /usr/local/sbin/dnsmasq
+    state: link
+
+- name: create variables file for boot_server, coreos_release, and coreos_channel
+  copy:
+    dest: group_vars/local/coreos.yaml
+    content: "boot_server_ip: \"10.2.0.200\"\nboot_server_ip_base: \"10.2.0.0\"\nboot_server_ip_netmask: \"255.255.255.0\"\ncoreos_channel: alpha\ncoreos_release: \"current\""
+    force: no
+
+- name: Download undionly.kpxe if needed
+  stat:
+    path: cbm/assets/pxe/undionly.kpxe.0
+  register: undionly_file
+- get_url:
+    dest: cbm/assets/pxe/undionly.kpxe.0
+    url: http://boot.ipxe.org/undionly.kpxe
+  when: undionly_file.stat.exists==False
+
+- include: configure.yaml

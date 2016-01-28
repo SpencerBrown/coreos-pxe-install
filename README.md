@@ -1,44 +1,97 @@
-# coreos-pxe-install
+# Network booting CoreOS to bare metal machines
 
-How to PXE boot CoreOS and install it to disk for bare metal machines
+This project uses two excellent projects: [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) and [coreos-baremetal](https://github.com/coreos/coreos-baremetal). Both of these work on either Linux or OS X. 
 
-# Your environment
+This guide details how to set up an "environment", which is a cluster of CoreOS bare metal servers.
+Ansible playbooks are provided to automate the setup and operation.
 
-To create an environment, pick a name that's unique in your repository. For this example let's call it `austin`.
+Testing have been done using OS X as the boot server, and VirtualBox virtual machines and real machines as the booted machines.
 
-`ansible-playbook -e env=austin -i hosts make-environment.yaml` will create your environment for you, 
-including a new SSH keypair `austin-key` and `austin-key.pub`. 
+# Initial setup
+
+See [Initial Setup document](docs/initial-setup.markdown).
+
+# Create an environment
+
+To create an environment, pick a name that's unique in your repository. For this example let's call it `vbox`.
+The environment represents a CoreOS cluster of bare metal machines, which share an SSH key and a configuration.
+
+`ansible-playbook -e env=vbox -i hosts make-environment.yaml` will create your environment for you, 
+including a new SSH keypair `vbox-key` and `vbox-key.pub`. 
 This keypair is saved in your `~/.ssh` directory, and also copied to your environment's `secret-files` and `public-files` directories.
 
-Once your environment is set up, change to its directory, for example, `cd austin`.
+Once your environment is set up, change to its directory, for example, `cd vbox`.
 
-# Ansible and sharing secret keys
+## Sharing an environment
 
-Each environment directory, has a subdirectory `secret-files`, to hold files that have secret information.
-For example, you can place SSH private keys, SSL private keys, and Docker credentials in the `secret-files` directory.
-The `secret-files` directory is mentioned in the `.gitignore` file, so your secret files will never be included in a git commit or pushed to a remote git repository such as GitHub.
+If you wish to share your environment, configurations, and secrets with others, create a fork of the repo.
+Do your setup, then encrypt your secrets and push the results to your fork on GitHub.
+Another team member can clone your repo and add the environment's password, then decrypt the secrets.
+See [Sharing Secrets](docs/sharing-secrets.markdown) for more information.
 
-So, how do you share secret files among team members? If you create new secret files, and you want another team member to work with them, 
-you have to make them available by some means outside of the Git repository. This interrupts your Git workflow and adds a path for mistakes.
+# Configure your environment
 
-This repository supports encrypting your secret files, committing and pushing the encrypted files via Git, and decrypting them back into their original form.
-The only secret that needs to be shared is a single password per environment.
+Change to your environment directory, and edit the file `group_vars/local/coreos.yaml`.
+Set the variables according to your local configuration as follows:
 
-To use this feature, the original creator of the environment follows these steps:
+Variable | Value | Default
+---------|-------|--------
+boot_server_ip | IP address of boot server | 10.2.0.200
+boot_server_ip_base | Base IP address of local network | 10.2.0.0 |
+boot_server_ip_netmask | Netmask for local network | 255.255.255.0
+coreos_channel | CoreOS release channel (alpha, beta, stable) | alpha
+coreos_release | CoreOS specific release e.g. 935.0.0 | current
 
-1. Create your environment as described above. This will automatically add a new SSH keypair to your environment, and create a random encryption password saved in `vault-password`.
-2. Add additional secret files to the `secret-files` directory, as appropriate. These can be binary or text, but should be relatively small files.
-3. Run `ansible-playbook ../encrypt-secret-files.yaml`.
-4. Commit the changes using Git, and push the changes to a shared repository such as Github. 
+Setting coreos_release to "current" will fetch the latest release for that release channel.
 
-The team member who wishes to use the environment follows these steps:
+Then, run `ansible_playbook ../make_cbm.yaml` to configure your environment and download the necessary binaries.
+If anything changes, rerun the playbook to reconfigure the environment.
 
-1. Ask the creator for the environment's `vault-password` file contents. It will be a random string of 20 or so letters. Create your own `vault-password` file in the environment directory. 
-2. Clone and/or pull the shared repository locally, so that it's up-to-date.
-3. `cd <env>` where `<env>` is the name of your environment.
-4. `ansible-playbook ../decrypt-secret-files.yaml`.
-5. You may wish to copy the SSH keys for your environment to your `~/.ssh` directory.
+# Start the boot services
 
-If you need to add or change secret files, make your changes in your `secret-files` directory, then run the `encrypt-secret-files.yaml` playbook and commit/push.
- 
-Then, other team members can pull your changes and run the `decrypt-secret-files` playbook to update their local secret files.
+Set the environment variable CBM to the path for the `cbm` directory for your environment. For example:
+
+`export CBM=~/src/coreos-pxe-install/vbox/cbm`
+
+## OS X
+
+Start the coreos-baremetal service:
+
+```bash
+cd $CBM
+./bootcfg --address=0.0.0.0:8080
+```
+
+In another terminal window, start the dnsmasq service:
+
+```bash
+cd $CBM
+sudo ./dnsmasq -C dnsmasq.data/dnsmasq.conf -k --log-facility=- --log-dhcp
+```
+
+dnsmasq must run as root because it opens privileged ports to listen for DHCP and TFTP requests from the PXE booted servers.
+You must enter your OS X password.
+
+# Boot your booted machine for the first time
+
+Power on the booted machine. For first time use, you may want to attach a keyboard and display for debugging purposes.
+You should see CoreOS boot up with the hostname set to `default`.
+If you have a keyboard/display attached, CoreOS will automatically login the core user.
+
+SSH into the machine. Commands to use:
+* `ip addr` - discover IP addresses and MAC addresses.
+* `lsblk` - discover disks.
+
+## Troubleshooting
+
+The most common cause of network boot failure is incorrect BIOS configuration on the booted server.
+
+## Note the server MAC address
+
+The window running `dnsmasq` will have a message similar to:
+
+`dnsmasq-dhcp[8655]: PXE(en0) 90:2b:34:14:f6:6a proxy`
+
+Make a note of the MAC address of your booted machine, in this example it is `90:2b:34:14:f6:6a`
+
+

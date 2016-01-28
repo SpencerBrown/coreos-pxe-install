@@ -1,5 +1,8 @@
 # Create an Arch Linux utility machine
 
+NOTE:  this document is not applicable to the current setup. We are not using Arch Linux.
+We are keeping this document here because it's a nice guide to setting up Arch Linux in general.
+
 ## Acquire a machine
 
 It should:

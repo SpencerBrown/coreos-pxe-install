@@ -1,0 +1,5 @@
+- name: Set up the CoreOS Bare Metal configuration for an environment
+  hosts: local
+  gather_facts: no
+  roles:
+  - cbm

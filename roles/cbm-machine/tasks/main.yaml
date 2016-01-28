@@ -1,0 +1,12 @@
+
+- name: Set up machine for Ansible if in initialize state
+  script: ansible-setup.sh
+  when: boot_state == "initialize"
+
+- name: create initialize.json Ignition file if machine in initialize state
+  # implies can only initialize one machine at a time
+  template:
+    src: initialize.json
+    dest: "cbm/data/ignition/initialize.json"
+  delegate_to: localhost
+  when: boot_state == "initialize"

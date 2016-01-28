@@ -1,48 +1,18 @@
 
-- name: Create cbm directories
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-  - cbm/data/ignition
-  - cbm/data/cloud
-  - cbm/data/specs/default
-  - cbm/data/specs/initialize
-  - cbm/data/specs/normal
-  - cbm/dnsmasq.data/tftp
-  - cbm/assets/coreos
-
-- name: Create symlinks to executables
-  file:
-    path: cbm/bootcfg
-    src: "{{ cbm_gopath }}/src/github.com/coreos/coreos-baremetal/bin/bootcfg"
-    state: link
-- file:
-    path: cbm/dnsmasq
-    src: /usr/local/sbin/dnsmasq
-    state: link
-
-- name: Download undionly.kpxe if needed
-  stat:
-    path: cbm/dnsmasq.data/tftp/undionly.kpxe.0
-  register: undionly_file
-- get_url:
-    dest: cbm/dnsmasq.data/tftp/undionly.kpxe.0
-    url: http://boot.ipxe.org/undionly.kpxe
-  when: undionly_file.stat.exists==False
+- name: Create dnsmasq.conf and dnsmasq.leases
+  template:
+    src: dnsmasq.conf
+    dest: cbm/dnsmasq.data/dnsmasq.conf
+- copy:
+    dest: cbm/dnsmasq.data/dnsmasq.leases
+    content: ""
+    force: no
 
 - name: Create config.yaml
   copy:
     src: config.yaml
     dest: cbm/data/config.yaml
-
-- name: Create dnsmasq.conf and dnsmasq.leases
-  template:
-    src: dnsmasq.conf
-    dest: cbm/dnsmasq.data/dnsmasq.conf
-- file:
-    path: cbm/dnsmasq.data/dnsmasq.leases
-    state: touch
+    force: no
 
 - name: create spec.json files for default, initialize, and normal
   template:

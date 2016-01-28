@@ -1,0 +1,11 @@
+{
+  "id": "normal",
+  "boot": {
+    "kernel": "/assets/coreos/current/coreos_production_pxe.vmlinuz",
+    "initrd": [ "/assets/coreos/current/coreos_production_pxe_image.cpio.gz" ],
+    "cmdline": {
+      "coreos.autologin": "",
+      "root": "/dev/sda1"
+    }
+  }
+}
