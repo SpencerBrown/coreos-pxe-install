@@ -1,3 +1,12 @@
+# Status: DO NOT USE. In transition.
+
+Work items: 
+
+1. Stop using Ansible and start using Go language with templating instead.
+2. Update due to lots of changes in the coreos-baremetal project.
+3. Update because the iPXE driver for VirtualBox is now too large (see repo virtualbox-ipxe)
+
+
 # Network booting CoreOS to bare metal machines
 
 This project uses two excellent projects: [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) and [coreos-baremetal](https://github.com/coreos/coreos-baremetal). Both of these work on either Linux or OS X. 

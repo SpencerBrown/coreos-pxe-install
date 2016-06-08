@@ -1,0 +1,8 @@
+{
+  "id": "default",
+  "name": "PXE CoreOS alpha",
+  "profile": "pxe",
+  "metadata": {
+    "ssh_authorized_keys": ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtVlvW+aP795lOoSbE3QiNmrAgyQ8ZAlPS7wM4G0yw5s1SfwROHzmWziCt5vUgLQAXV2gugr+lVDb3NLjTeIz1wgWUCiawh91HBo5FYF0Lixo0/qo1mvaARt03u2dZipIzMeiLpwuhSerBQYsrNWOqb3O8JbrRskY1T6i1I6J03XoXtmJ2nHOX47Bqmx9/YhXVYLwWcrkLulH/c52/Kkl8X/5y17xbnTunS1C7BKU7j/tcOJtJsdncXvQVckP77+xBGsx68LgHCtrNhXIg8wyo/Y8hJdguZDX8BDWYJ2ZjI6j9xGB5DhkFbAxetIU9HxOdXIvIkE5beb9BsSyD52yt spencer@Spencers-MBP-2"]
+  }
+}
