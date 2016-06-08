@@ -2,11 +2,13 @@
 
 ## Machines
 
-You will need an OS X or CoreOS machine to act as a PXE boot server.
-You will need machines that you want to PXE boot into CoreOS. We will call these the booted machines.
-You will need administrative access to the boot server.
-You will need physical access, most likely, to the booted servers.
-All these machines should have Ethernet wired connections to the local network.
+You will need:
+
+* an OS X or CoreOS machine to act as a PXE boot server.
+* machines that you want to PXE boot into CoreOS. We will call these the booted machines.
+* administrative access to the boot server.
+* physical access, most likely, to the booted servers.
+* All these machines should have Ethernet wired connections to the local network.
 
 ## Local network
 

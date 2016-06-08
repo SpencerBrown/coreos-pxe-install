@@ -15,7 +15,7 @@
       {
         "name": "set-hostname.service",
         "enable": true,
-        "contents": "[Unit]\n[Service]\nType=oneshot\nExecStart=/usr/bin/hostnamectl set-hostname default\n[Install]\nWantedBy=multi-user.target"
+        "contents": "{{ lookup('file', 'set-hostname-default.service') | replace('\n', '\\n') }}"
       }
     ]
   }

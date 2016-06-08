@@ -1,0 +1,3 @@
+{% do cbm_ignition.update({'passwd':cbm_sshkey}) %}
+
+{{ cbm_ignition | to_nice_json }}

@@ -22,7 +22,7 @@
     src: /usr/local/sbin/dnsmasq
     state: link
 
-- name: create variables file for boot_server, coreos_release, and coreos_channel
+- name: create variables file for boot_server_ip, boot_server_ip_base, boot_server_ip_netmask, coreos_release, and coreos_channel
   copy:
     dest: group_vars/local/coreos.yaml
     content: "boot_server_ip: \"10.2.0.200\"\nboot_server_ip_base: \"10.2.0.0\"\nboot_server_ip_netmask: \"255.255.255.0\"\ncoreos_channel: alpha\ncoreos_release: \"current\""

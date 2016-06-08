@@ -1,4 +1,4 @@
 
-cbm_gopath: "{{ lookup('env', 'GOPATH') }}"
 cbm_ignition: "{{ { 'ignitionVersion': 1 } }}"
 cbm_sshkey: "{{ { 'users': [ { 'name': 'core', 'sshAuthorizedKeys': [ lookup('file', env+'/public-files/'+env+'-key.pub') ] } ] } }}"
+cbm_disk: "{{ { 'disks': [ { 'device': '/dev/'boot_disk, 'wipeTable': true, 'partitions': [ { 'label': 'ROOT', 'number': 0 } ]  } ] }}"

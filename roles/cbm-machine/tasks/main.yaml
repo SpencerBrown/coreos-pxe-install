@@ -6,7 +6,7 @@
 - name: create initialize.json Ignition file if machine in initialize state
   # implies can only initialize one machine at a time
   template:
-    src: initialize.json
+    src: initialize.j2
     dest: "cbm/data/ignition/initialize.json"
   delegate_to: localhost
   when: boot_state == "initialize"

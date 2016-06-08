@@ -15,7 +15,33 @@
       {
         "name": "set-hostname.service",
         "enable": true,
-        "contents": "[Unit]\n[Service]\nType=oneshot\nExecStart=/usr/bin/hostnamectl set-hostname {{ inventory_hostname }}\n[Install]\nWantedBy=multi-user.target"
+        "contents": "{{ lookup('file', 'set-hostname.service') | | replace ('$HOSTNAME', inventory_hostname) | replace('\n', '\\n') }}"
+      }
+    ]
+  },
+  "storage": {
+    "disks": [
+      {
+        "device": "/dev/{{ boot_disk }}",
+        "wipeTable": true,
+        "partitions": [
+          {
+            "label": "ROOT",
+            "number": 0
+          }
+        ]
+      }
+    ],
+    "filesystems": [
+      {
+        "device": "/dev/{{ boot_disk }}1",
+        "format": "ext4",
+        "create": {
+          "force": true,
+          "options": [
+            "-i 8192"
+          ]
+        }
       }
     ]
   }

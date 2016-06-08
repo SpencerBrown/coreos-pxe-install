@@ -15,13 +15,11 @@ groups:
 - name: initialize
   spec: initialize
   require:
-    mac: 08:00:27:ba:be:10
-    #uuid: nobody
+    uuid: c322f332-e05a-449f-8939-8d4f2f012312
 
 # The normal spec simply boots the system. It assumes everything is already configured.
 - name: normal
   spec: normal
   require:
-    #mac: 90:2b:34:14:f6:6a
     uuid: nobody
 

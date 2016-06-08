@@ -2,7 +2,7 @@
 localhost ansible_connection=local
 
 [coreos]
-vbox-01 ansible_host="10.3.0.210" boot_mac="08:00:27:ba:be:10" boot_state=initialize
+vbox-01 ansible_host="10.3.0.210" boot_mac="08:00:27:ba:be:10" boot_disk="sda" boot_state=initialize
 
 [coreos:vars]
 ansible_user=core

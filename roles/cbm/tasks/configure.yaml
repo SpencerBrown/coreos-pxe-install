@@ -25,7 +25,8 @@
 
 - name: create default.json Ignition file
   template:
-    src: default.json
+    #src: default.json
+    src: default.j2
     dest: "cbm/data/ignition/default.json"
 
 - name: If needed, download CoreOS pxe binaries and verify signatures

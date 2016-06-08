@@ -1,0 +1,6 @@
+[Unit]
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/hostnamectl set-hostname $HOSTNAME
+[Install]
+WantedBy=multi-user.target
